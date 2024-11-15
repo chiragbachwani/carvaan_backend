@@ -80,7 +80,7 @@ exports.deleteCar = async (req, res) => {
 
         // Delete images from S3
         for (const imageUrl of car.images) {
-            const fileKey = imageUrl.split('.com/')[1];
+            const fileKey = imageUrl.split('.com/')[1]; // Extract file path from URL
             await deleteFile(fileKey);
         }
 

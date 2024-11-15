@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const auth = require('../middlewares/authMiddleware');
-const upload = require('../middlewares/uploadMiddleware');
+const upload = require('../config/multer'); // Use updated multer config
 const {
     createCar,
     viewCars,

@@ -2,28 +2,32 @@ const Car = require('../models/car');
 const { uploadFile } = require('../utils/s3');
 
 // Create a new car
+// const { uploadFile } = require('../utils/s3');
+
 exports.createCar = async (req, res) => {
     try {
         const { title, description, tags } = req.body;
         const images = [];
 
+        // Upload each file to S3
         for (const file of req.files) {
-            const imageUrl = await uploadFile(file);
+            const imageUrl = await uploadFile(file); // Pass in-memory file to S3 upload function
             images.push(imageUrl);
         }
 
         const car = new Car({
             title,
             description,
-            tags,
+            tags: tags.split(','), // Convert comma-separated tags to an array
             images,
             user: req.user.id,
         });
 
         await car.save();
         res.status(201).json({ message: 'Car created successfully', car });
-    } catch (err) {
-        res.status(400).json({ message: 'Error creating car', error: err.message });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: 'Internal Server Error', error: error.message });
     }
 };
 

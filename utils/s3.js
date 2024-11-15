@@ -1,15 +1,13 @@
-const { PutObjectCommand, DeleteObjectCommand } = require('@aws-sdk/client-s3');
+const { PutObjectCommand } = require('@aws-sdk/client-s3');
 const s3Client = require('../config/s3Client');
 const bucketName = process.env.AWS_BUCKET_NAME;
 
-// Upload a file to S3
 const uploadFile = async (file, folder = 'uploads') => {
     const params = {
         Bucket: bucketName,
-        Key: `${folder}/${file.originalname}`, // File path in S3
-        Body: file.buffer, // File content
-        ContentType: file.mimetype, // File type
-        ACL: 'public-read', // Publicly accessible
+        Key: `${folder}/${Date.now()}_${file.originalname}`, // Unique file name
+        Body: file.buffer, // Use the buffer from the in-memory file
+        ContentType: file.mimetype, // Preserve the file's MIME type
     };
 
     try {
@@ -22,24 +20,6 @@ const uploadFile = async (file, folder = 'uploads') => {
     }
 };
 
-// Delete a file from S3
-const deleteFile = async (fileKey) => {
-    const params = {
-        Bucket: bucketName,
-        Key: fileKey, // File path in S3
-    };
-
-    try {
-        const command = new DeleteObjectCommand(params);
-        await s3Client.send(command);
-        return { success: true };
-    } catch (err) {
-        console.error('Error deleting from S3:', err);
-        throw err;
-    }
-};
-
 module.exports = {
     uploadFile,
-    deleteFile,
 };

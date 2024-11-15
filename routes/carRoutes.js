@@ -11,6 +11,12 @@ const {
     searchCars
 } = require('../controllers/car_controller');
 
+
+
+// const upload = require('../middleware/multer');
+
+
+
 router.post('/', auth, upload.array('images', 10), createCar);       // Create car
 router.get('/', auth, viewCars);                                     // View all user's cars
 router.get('/search', auth, searchCars);                             // Search user's cars
@@ -19,3 +25,4 @@ router.put('/:id', auth, upload.array('images', 10), updateCar);     // Update c
 router.delete('/:id', auth, deleteCar);                              // Delete car
 
 module.exports = router;
+

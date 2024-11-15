@@ -1,15 +1,29 @@
 const Car = require('../models/car');
+const { uploadFile } = require('../utils/s3');
 
 // Create a new car
 exports.createCar = async (req, res) => {
     try {
         const { title, description, tags } = req.body;
-        const images = req.files.map(file => file.path);
-        const car = new Car({ title, description, tags, images, user: req.user.id });
+        const images = [];
+
+        for (const file of req.files) {
+            const imageUrl = await uploadFile(file);
+            images.push(imageUrl);
+        }
+
+        const car = new Car({
+            title,
+            description,
+            tags,
+            images,
+            user: req.user.id,
+        });
+
         await car.save();
         res.status(201).json({ message: 'Car created successfully', car });
-    } catch (error) {
-        res.status(400).json({ message: 'Error creating car', error });
+    } catch (err) {
+        res.status(400).json({ message: 'Error creating car', error: err.message });
     }
 };
 
@@ -56,13 +70,24 @@ exports.updateCar = async (req, res) => {
 };
 
 // Delete a car
+const { deleteFile } = require('../utils/s3');
+
 exports.deleteCar = async (req, res) => {
     try {
-        const car = await Car.findOneAndDelete({ _id: req.params.id, user: req.user.id });
+        const car = await Car.findById(req.params.id);
+
         if (!car) return res.status(404).json({ message: 'Car not found' });
+
+        // Delete images from S3
+        for (const imageUrl of car.images) {
+            const fileKey = imageUrl.split('.com/')[1];
+            await deleteFile(fileKey);
+        }
+
+        await car.remove();
         res.status(200).json({ message: 'Car deleted successfully' });
-    } catch (error) {
-        res.status(500).json({ message: 'Error deleting car', error });
+    } catch (err) {
+        res.status(400).json({ message: 'Error deleting car', error: err.message });
     }
 };
 

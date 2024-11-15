@@ -1,5 +1,5 @@
 const { PutObjectCommand, DeleteObjectCommand } = require('@aws-sdk/client-s3');
-const s3Client = require('../config/S3Client');
+const s3Client = require('../config/s3Client');
 const bucketName = process.env.AWS_BUCKET_NAME;
 
 // Upload a file to S3
